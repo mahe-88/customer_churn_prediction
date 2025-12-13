@@ -1,1 +1,105 @@
 
+project:
+  name: customer_churn_prediction
+  seed: 42
+
+paths:
+  root: "C:/first_data_science_proj/customer_churn_prediction"
+  data_raw: "C:/first_data_science_proj/customer_churn_prediction/data/raw"
+  data_processed: "C:/first_data_science_proj/customer_churn_prediction/data/processed"
+  models_dir: "C:/first_data_science_proj/customer_churn_prediction/models"
+  data_dir: "data" # new unseen data
+  reports_dir: "C:/first_data_science_proj/customer_churn_prediction/reports"
+
+data:
+  raw_file: "churn_Prediction_IBM.csv"
+  processed_file: "churn_preprocessed_v2.csv"
+  target: "Churn"
+
+preprocessing:
+  categorical_cols:
+    - gender
+    - SeniorCitizen
+    - Partner
+    - Dependents
+    - PhoneService
+    - MultipleLines
+    - InternetService
+    - OnlineSecurity
+    - OnlineBackup
+    - DeviceProtection
+    - TechSupport
+    - StreamingTV
+    - StreamingMovies
+    - Contract
+    - PaperlessBilling
+    - PaymentMethod
+    - tenure_group
+  numeric_cols:
+    - tenure
+    - MonthlyCharges
+    - TotalCharges
+    - FiberOptic
+    - Family
+    - ProtectiveServices
+    - StreamingAddict
+    - ContractScore
+    - PaymentRisk
+    - HighCharges
+    - AvgMonthlySpend
+    - Newcustomer
+  numeric_imputer_strategy: "median"
+  categorical_imputer_strategy: "most_frequent"
+  onehot_drop: "first"
+  onehot_handle_unknown: "ignore"
+  scale_numeric: true
+
+feature_engineering:
+  tenure_bins: [-1, 12, 24, 48, 60, 71]
+  tenure_labels: ["0-1", "1-2", "2-4", "4-5", "5-6"]
+  service_cols: ["OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"]
+  streaming_cols: ["StreamingTV", "StreamingMovies"]
+  contract_score_map:
+    Month- to-month: 3
+    One year: 2
+    Two year: 1
+  payment_risk_map:
+    Electronic check: 4
+    Mailed check: 3
+    Bank transfer (automatic): 2
+    Credit card (automatic): 1
+  high_charges_threshold: 70
+  new_customer_max_tenure: 6
+  replace_no_service_cols: ["OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies", "MultipleLines"]
+
+training:
+  test_size: 0.2
+  stratify: true
+  cv_splits: 5
+  use_smote: true
+  estimator: "RandomForest"
+  random_forest_params:
+    n_estimators: 844
+    max_depth: 6
+    min_samples_split: 8
+    min_samples_leaf: 6
+    max_features: "log2"
+    n_jobs: -1
+  gradient_boosting_params:
+    random_state: 42
+
+evaluation:
+  compute_pr_threshold: true
+  f1_eps: 1e-10
+  plot_confusion_matrix: true
+  plot_roc: true
+  plot_pr: true
+  aim_recall_min: 0.75
+  aim_auc_min: 0.85
+
+explainability:
+  use_shap: true
+  shap_plot_max_display: 10
+
+serialization:
+  model_filename: "churn_trained_rf_model.pkl"
